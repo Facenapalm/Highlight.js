@@ -6,7 +6,7 @@
 // @include     https://cmc.ejudge.ru/ej/client/standings/*
 // @author      Listov Anton
 // @license     WTFPL (http://www.wtfpl.net/about/). 
-// @version     2.0
+// @version     2.1
 // @grant       none
 // ==/UserScript==
 
@@ -16,11 +16,12 @@
 	//customization: undefined values will be ignored
 	var colorDefault = "#fbffbd";
 	var colorCompleted = "#b9ffa7";
-	var colorTried = "#ff8800";
-	var colorSkipped = "#ff3800";
+	var colorTried = "#ffac4e";
+	var colorSkipped = "#ff5e3b";
 
-	var linkAttachment = true;
-	var statisticShow = true;
+	var needToAttachLinks = true;
+	var needToShowStatistic = true;
+	var needToHideEmptyCols = true;
 
 	/* highlight function will be automatically called for each of these arguments, where:
 	 * highlight(undefined), same to highlight() - highlights you
@@ -44,16 +45,10 @@
 
 	var rowBackups = {};
 
-	var changeColor = function(elem, color) {
-		if (color !== undefined) {
-			elem.style.background = color;
-		}
-	};
-
 	var getRowNumber = function(row) {
 		if (typeof row === "undefined") {
 			var titleText = document.getElementsByClassName("main_phrase")[0].innerHTML;
-			row = /[^ ]* [^ ]*/.exec(titleText)[0];
+			row = /[^ ]* [^ ]*/.exec(titleText)[0]; //get first two words
 		}
 
 		if (typeof row === "string") {
@@ -70,10 +65,29 @@
 		}
 	};
 
+	var isColSolvable = function(index) {
+		return header[index].innerHTML.indexOf("u") !== -1;
+	};
+
+	var isCellDone = function(cellText) {
+		return cellText.indexOf("<b>") !== -1;
+	};
+
+	var isCellSkipped = function(cellText) {
+		return cellText === "&nbsp;";
+	};
+
+	var changeColor = function(elem, color) {
+		if (color !== undefined || color === "") {
+			elem.style.background = color;
+		}
+	};
+
 	var highlight = function(row) {
 		var rowNumber = getRowNumber(row);
-		if (rowNumber === undefined)
+		if (rowNumber === undefined) {
 			return;
+		}
 		row = rows[rowNumber];
 
 		if (rowBackups[rowNumber] !== undefined) {
@@ -93,13 +107,13 @@
 		row = row.childNodes;
 		for (var i = 2; i < lastCol; i++) {
 			var cell = row[i].innerHTML;
-			if (header[i].innerHTML.indexOf("u") !== -1) {
-				if (cell.indexOf("<b>") !== -1) {
+			if (isColSolvable(i)) {
+				if (isCellDone(cell)) {
 					changeColor(row[i], colorCompleted);
-				} else if (cell.indexOf("0") !== -1) {
-					changeColor(row[i], colorTried);
-				} else {
+				} else if (isCellSkipped(cell)) {
 					changeColor(row[i], colorSkipped);
+				} else {
+					changeColor(row[i], colorTried);
 				}
 			}
 		}
@@ -113,9 +127,9 @@
 			var done = 0;
 			var needed = 0;
 			for (var i = 2; i < lastCol; i++) {
-				if (header[i].innerHTML.indexOf("u") !== -1) {
+				if (isColSolvable(i)) {
 					needed ++;
-					done += row[i].innerHTML.indexOf("<b>") !== -1;
+					done += isCellDone(row[i].innerHTML);
 				}
 			}
 			var percentage = done === needed ? 100 : Math.round(100 * done / needed);
@@ -126,11 +140,39 @@
 		}
 	};
 
-	if (statisticShow) {
+	var hideEmptyCols = function() {
+		var lastToHide = 0;
+		for (var i = lastCol - 1; i >= 2; i--) {
+			if (isColSolvable(i)) {
+				lastToHide = i;
+				break;
+			}
+		}
+		//to prevent hidding current tasks
+
+		var needToHide;
+		for (var i = 2; i < lastToHide; i++) {
+			needToHide = !isColSolvable(i);
+			for (var j = 1; j < lastRow; j++) {
+				needToHide = needToHide && !isCellDone(rows[j].childNodes[i].innerHTML);
+			}
+			if (needToHide) {
+				for (var j = 0; j < rows.length; j++) {
+					rows[j].childNodes[i].style.display = "none";
+				}
+			}
+		}
+	};
+
+	if (needToHideEmptyCols) {
+		hideEmptyCols();
+	}
+
+	if (needToShowStatistic) {
 		showStatistic();
 	}
 
-	if (linkAttachment) {
+	if (needToAttachLinks) {
 		for (var i = 1; i < lastRow; i++) {
 			names[i].innerHTML = "<a>" + names[i].innerHTML + "</a>";
 			names[i].childNodes[0].onclick = highlight.bind(this, i);
@@ -139,7 +181,7 @@
 
 	for (var i = 0; i < autocall.length; i++) {
 		if (rowBackups[getRowNumber(autocall[i])] === undefined) {
-			//to prevent collisions in autocall list
+			//^ to prevent collisions in autocall list
 			highlight(autocall[i]);
 		}
 	}
