@@ -6,7 +6,7 @@
 // @include     https://cmc.ejudge.ru/ej/client/standings/*
 // @author      Listov Anton
 // @license     WTFPL (http://www.wtfpl.net/about/). 
-// @version     2.2b
+// @version     2.3
 // @grant       none
 // ==/UserScript==
 
@@ -19,11 +19,18 @@
 	var colorTried = "#ffac4e";
 	var colorSkipped = "#ff5e3b";
 
+	var needToHideEmptyCols = true;
+	var needToHideAllCols = false;
+	var needToAddHideButtons = true;
+
 	var needToAttachNameLinks = true;
 	var needToAttachTaskLinks = true;
 	var needToShowStatistic = true;
-	var needToHideEmptyCols = true;
-	var needToHideAllCols = false;
+
+	var textHide = "Hide";
+	var textAll = "all";
+	var textEmpty = "empty";
+	var textNothing = "nothing";
 
 	/* highlight function will be automatically called for each of these arguments, where:
 	 * highlight(undefined), same to highlight() - highlights you
@@ -34,9 +41,15 @@
 		undefined
 	];
 
-	//implemetation
+
+
+	/* IMPLEMENTATION */
+
 	if (document.getElementsByClassName("standings").length === 0) {
 		return; //wrong page
+	}
+	if (document.getElementById("highlight_copyright") !== null) {
+		return; //script has already changed the page
 	}
 
 	var names = document.getElementsByClassName("st_team");
@@ -51,7 +64,8 @@
 	var firstCol = 2; //except "place" and "user" columns
 	var lastCol = header.length - 2; //except "solved problems" and "score" columns
 
-	var rowBackups = {};
+	var highlighted = [];
+
 
 	var getRowNumber = function(row) {
 		if (typeof row === "undefined") {
@@ -98,16 +112,20 @@
 		}
 		row = rows[rowNumber];
 
-		if (rowBackups[rowNumber] !== undefined) {
-			//previous condition restoring
-			row.style = null;
-			row.innerHTML = rowBackups[rowNumber];
-			names[rowNumber].childNodes[0].onclick = highlight.bind(this, rowNumber);
+		var pos = highlighted.indexOf(rowNumber);
+		if (pos !== -1) {
+			//dehighlight
+			row.style.background = "";
 
-			delete rowBackups[rowNumber];
+			row = row.childNodes;
+			for(var i = 0; i < row.length; i++) {
+				row[i].style.background = "";
+			}
+
+			highlighted.splice(pos, 1);
 			return;
 		} else {
-			rowBackups[rowNumber] = row.innerHTML;
+			highlighted.push(rowNumber);
 		}
 
 		changeColor(row, colorDefault);
@@ -133,7 +151,11 @@
 	};
 
 	var showStatistic = function() {
-		rows[0].innerHTML += "<th class=\"st_score\">%</th>";
+		var curCell = document.createElement("th");
+		curCell.classList.add("st_score");
+		curCell.innerHTML = "%";
+		rows[0].appendChild(curCell);
+
 		var fullDone = 0;
 		var fullNeeded = 0;
 		var curDone, curNeeded;
@@ -148,14 +170,25 @@
 					curDone += isCellDone(row[i].innerHTML);
 				}
 			}
-			rows[j].innerHTML += "<td class=\"st_score\">" + calcPercentage(curDone, curNeeded) + "</td>";
-
 			fullDone += curDone;
 			fullNeeded += curNeeded;
+
+			curCell = document.createElement("td");
+			curCell.classList.add("st_score");
+			curCell.innerHTML = calcPercentage(curDone, curNeeded).toString();
+			rows[j].appendChild(curCell);
 		}
-		rows[lastRow].innerHTML += "<td class=\"st_score\">" + calcPercentage(fullDone, fullNeeded) + "</td>";
+
+
+		curCell = document.createElement("td");
+		curCell.classList.add("st_score");
+		curCell.innerHTML = calcPercentage(fullDone, fullNeeded).toString();
+		rows[lastRow].appendChild(curCell);
+
 		for (var j = lastRow + 1; j < rows.length; j++) {
-			rows[j].innerHTML += "<td class=\"st_score\">&nbsp;</td>";
+			curCell = document.createElement("td");
+			curCell.classList.add("st_score");
+			rows[j].appendChild(curCell);
 		}
 	};
 
@@ -183,6 +216,35 @@
 		}
 	};
 
+	var showCols = function() {
+		var cells = document.getElementsByClassName("st_prob");
+		for (var i = 0; i < cells.length; i++) {
+			cells[i].style.display = "";
+		}
+	};
+
+	var addHideButtons = function() {
+		var hideButtons = document.createElement("p");
+		hideButtons.style.font.fontsize = "14px";
+		hideButtons.innerHTML = textHide + ": <a>" + textAll + "</a> / <a>" + textEmpty + "</a> / <a>" + textNothing + "</a>.";
+
+		var hideAllButton = hideButtons.childNodes[1];
+		var hideEmptyButton = hideButtons.childNodes[3];
+		var hideNothingButton = hideButtons.childNodes[5];
+
+		hideAllButton.onclick = function() { hideCols(true); };
+		hideAllButton.style.cursor = "pointer";
+
+		hideEmptyButton.onclick = function() { showCols(); hideCols(); };
+		hideEmptyButton.style.cursor = "pointer";
+
+		hideNothingButton.onclick = showCols;
+		hideNothingButton.style.cursor = "pointer";
+
+		var container = document.getElementsByClassName("l14")[0];
+		container.appendChild(hideButtons);
+	};
+
 	var attachTaskLinks = function() {
 		var linkPrefix = window.location.href.replace("standings", "view-problem-submit") + "?prob_id=";
 		for (var i = firstCol; i < lastCol; i++) {
@@ -204,6 +266,20 @@
 		}
 	};
 
+	var addCopyright = function() {
+		var copyright = document.createElement("p");
+		copyright.id = "highlight_copyright";
+		copyright.classList.add("ejudge_copyright");
+		copyright.innerHTML = "<a href=\"https://github.com/Facenapalm/Highlight.js\">Highlight.js</a> &copy; 2015-2016 Listov Anton.";
+
+		var footer = document.getElementById("footer");
+		footer.appendChild(copyright);
+	};
+
+	if (needToAddHideButtons) {
+		addHideButtons();
+	}
+
 	if (needToHideEmptyCols || needToHideAllCols) {
 		hideCols(needToHideAllCols);
 	}
@@ -221,9 +297,11 @@
 	}
 
 	for (var i = 0; i < autocall.length; i++) {
-		if (rowBackups[getRowNumber(autocall[i])] === undefined) {
+		if (highlighted.indexOf(getRowNumber(autocall[i])) === -1) {
 			//^ to prevent collisions in autocall list
 			highlight(autocall[i]);
 		}
 	}
+
+	addCopyright();
 })();
