@@ -6,7 +6,7 @@
 // @include     https://cmc.ejudge.ru/ej/client/standings/*
 // @author      Listov Anton
 // @license     WTFPL (http://www.wtfpl.net/about/). 
-// @version     2.2
+// @version     2.2b
 // @grant       none
 // ==/UserScript==
 
@@ -74,7 +74,7 @@
 	};
 
 	var isColSolvable = function(index) {
-		return header[index].innerHTML.indexOf("u") !== -1;
+		return header[index].innerHTML.search(/(ku|up)\d\d-\d/) !== -1;
 	};
 
 	var isCellDone = function(cellText) {
