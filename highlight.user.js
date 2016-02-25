@@ -6,7 +6,7 @@
 // @include     https://cmc.ejudge.ru/ej/client/standings/*
 // @author      Listov Anton
 // @license     WTFPL (http://www.wtfpl.net/about/). 
-// @version     2.1
+// @version     2.1b
 // @grant       none
 // ==/UserScript==
 
@@ -34,6 +34,7 @@
 
 	//implemetation
 	var names = document.getElementsByClassName("st_team");
+	var firstRow = 1; //except header
 	var lastRow = names.length - 3; //except "total", "success" and "%" rows
 	var rows = [];
 	for (var i = 0; i < names.length; i++) {
@@ -41,7 +42,8 @@
 	}
 
 	var header = rows[0].childNodes;
-	var lastCol = header.length - 2;
+	var firstCol = 2; //except "place" and "user" columns
+	var lastCol = header.length - 2; //except "solved problems" and "score" columns
 
 	var rowBackups = {};
 
@@ -52,14 +54,14 @@
 		}
 
 		if (typeof row === "string") {
-			for (var i = 1; i < lastRow; i++) {
+			for (var i = firstRow; i < lastRow; i++) {
 				if (names[i].innerHTML.indexOf(row) !== -1) {
 					return i;
 				}
 			}
 			return undefined;
 		} else if (typeof row === "number") {
-			return row >= 1 && row < lastRow ? row : undefined;
+			return row >= firstRow && row < lastRow ? row : undefined;
 		} else {
 			return undefined;
 		}
@@ -105,7 +107,7 @@
 		changeColor(row, colorDefault);
 
 		row = row.childNodes;
-		for (var i = 2; i < lastCol; i++) {
+		for (var i = firstCol; i < lastCol; i++) {
 			var cell = row[i].innerHTML;
 			if (isColSolvable(i)) {
 				if (isCellDone(cell)) {
@@ -121,12 +123,12 @@
 
 	var showStatistic = function() {
 		rows[0].innerHTML += "<th class=\"st_score\">%</th>";
-		for (var j = 1; j < lastRow; j++) {
+		for (var j = firstRow; j < lastRow; j++) {
 			var row = rows[j].childNodes;
 
 			var done = 0;
 			var needed = 0;
-			for (var i = 2; i < lastCol; i++) {
+			for (var i = firstCol; i < lastCol; i++) {
 				if (isColSolvable(i)) {
 					needed ++;
 					done += isCellDone(row[i].innerHTML);
@@ -142,7 +144,7 @@
 
 	var hideEmptyCols = function() {
 		var lastToHide = 0;
-		for (var i = lastCol - 1; i >= 2; i--) {
+		for (var i = lastCol - 1; i >= firstCol; i--) {
 			if (isColSolvable(i)) {
 				lastToHide = i;
 				break;
@@ -150,16 +152,16 @@
 		}
 		//to prevent hidding current tasks
 
-		var needToHide;
-		for (var i = 2; i < lastToHide; i++) {
-			needToHide = !isColSolvable(i);
-			for (var j = 1; j < lastRow; j++) {
-				needToHide = needToHide && !isCellDone(rows[j].childNodes[i].innerHTML);
+		var successRow = rows[lastRow + 1].childNodes;
+		for (var i = firstCol; i < lastToHide; i++) {
+			if (isColSolvable(i)) {
+				continue;
 			}
-			if (needToHide) {
-				for (var j = 0; j < rows.length; j++) {
-					rows[j].childNodes[i].style.display = "none";
-				}
+			if (successRow[i].innerHTML !== "0") {
+				continue;
+			}
+			for (var j = 0; j < rows.length; j++) {
+				rows[j].childNodes[i].style.display = "none";
 			}
 		}
 	};
@@ -173,7 +175,7 @@
 	}
 
 	if (needToAttachLinks) {
-		for (var i = 1; i < lastRow; i++) {
+		for (var i = firstRow; i < lastRow; i++) {
 			names[i].innerHTML = "<a>" + names[i].innerHTML + "</a>";
 			names[i].childNodes[0].onclick = highlight.bind(this, i);
 		}
