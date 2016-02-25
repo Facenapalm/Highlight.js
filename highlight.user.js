@@ -6,7 +6,7 @@
 // @include     https://cmc.ejudge.ru/ej/client/standings/*
 // @author      Listov Anton
 // @license     WTFPL (http://www.wtfpl.net/about/). 
-// @version     2.3
+// @version     2.3b
 // @grant       none
 // ==/UserScript==
 
@@ -223,6 +223,16 @@
 		}
 	};
 
+	var hideLinkDesign = function(element) {
+		element.style.textDecoration = "none";
+		element.style.color = "black";
+	};
+
+	var showLinkDesign = function(element) {
+		element.style.textDecoration = "";
+		element.style.color = "";
+	}
+
 	var addHideButtons = function() {
 		var hideButtons = document.createElement("p");
 		hideButtons.style.font.fontsize = "14px";
@@ -232,14 +242,41 @@
 		var hideEmptyButton = hideButtons.childNodes[3];
 		var hideNothingButton = hideButtons.childNodes[5];
 
-		hideAllButton.onclick = function() { hideCols(true); };
 		hideAllButton.style.cursor = "pointer";
+		hideAllButton.onclick = function() {
+			hideCols(true);
 
-		hideEmptyButton.onclick = function() { showCols(); hideCols(); };
+			hideLinkDesign(hideAllButton);
+			showLinkDesign(hideEmptyButton);
+			showLinkDesign(hideNothingButton);
+		};
+
 		hideEmptyButton.style.cursor = "pointer";
+		hideEmptyButton.onclick = function() {
+			showCols();
+			hideCols(false);
 
-		hideNothingButton.onclick = showCols;
+			showLinkDesign(hideAllButton);
+			hideLinkDesign(hideEmptyButton);
+			showLinkDesign(hideNothingButton);
+		};
+
 		hideNothingButton.style.cursor = "pointer";
+		hideNothingButton.onclick = function() {
+			showCols();
+
+			showLinkDesign(hideAllButton);
+			showLinkDesign(hideEmptyButton);
+			hideLinkDesign(hideNothingButton);
+		};
+
+		if (needToHideAllCols) {
+			hideLinkDesign(hideAllButton);
+		} else if (needToHideEmptyCols) {
+			hideLinkDesign(hideEmptyButton);
+		} else {
+			hideLinkDesign(hideNothingButton);
+		}
 
 		var container = document.getElementsByClassName("l14")[0];
 		container.appendChild(hideButtons);
@@ -249,10 +286,7 @@
 		var linkPrefix = window.location.href.replace("standings", "view-problem-submit") + "?prob_id=";
 		for (var i = firstCol; i < lastCol; i++) {
 			header[i].innerHTML = "<a href=\"" + linkPrefix + (i - 1) + "\">" + header[i].innerHTML + "</a>";
-
-			var newElem = header[i].childNodes[0];
-			newElem.style.textDecoration = "none";
-			newElem.style.color = "black";
+			hideLinkDesign(header[i].childNodes[0]);
 		}
 	};
 
@@ -267,14 +301,17 @@
 	};
 
 	var addCopyright = function() {
+		var githubLink = "https://github.com/Facenapalm/Highlight.js/blob/master/highlight.user.js";
+
 		var copyright = document.createElement("p");
 		copyright.id = "highlight_copyright";
 		copyright.classList.add("ejudge_copyright");
-		copyright.innerHTML = "<a href=\"https://github.com/Facenapalm/Highlight.js\">Highlight.js</a> &copy; 2015-2016 Listov Anton.";
+		copyright.innerHTML = "<a href=\"" + githubLink + "\">Highlight.js</a> &copy; 2015-2016 Listov Anton.";
 
 		var footer = document.getElementById("footer");
 		footer.appendChild(copyright);
 	};
+
 
 	if (needToAddHideButtons) {
 		addHideButtons();
