@@ -1,12 +1,12 @@
 // ==UserScript==
 // @name        Highlight.js
 // @namespace   Facenapalm
-// @description Script highlights rows in CMC MSU ejudge (unicorn.ejudge.ru, cmc.ejudge.ru).
+// @description Script highlights rows in standings in CMC MSU ejudge (unicorn.ejudge.ru, cmc.ejudge.ru).
 // @include     https://unicorn.ejudge.ru/ej/client/standings/*
 // @include     https://cmc.ejudge.ru/ej/client/standings/*
 // @author      Listov Anton
 // @license     WTFPL (http://www.wtfpl.net/about/). 
-// @version     2.1b
+// @version     2.2
 // @grant       none
 // ==/UserScript==
 
@@ -19,9 +19,11 @@
 	var colorTried = "#ffac4e";
 	var colorSkipped = "#ff5e3b";
 
-	var needToAttachLinks = true;
+	var needToAttachNameLinks = true;
+	var needToAttachTaskLinks = true;
 	var needToShowStatistic = true;
 	var needToHideEmptyCols = true;
+	var needToHideAllCols = false;
 
 	/* highlight function will be automatically called for each of these arguments, where:
 	 * highlight(undefined), same to highlight() - highlights you
@@ -33,6 +35,10 @@
 	];
 
 	//implemetation
+	if (document.getElementsByClassName("standings").length === 0) {
+		return; //wrong page
+	}
+
 	var names = document.getElementsByClassName("st_team");
 	var firstRow = 1; //except header
 	var lastRow = names.length - 3; //except "total", "success" and "%" rows
@@ -80,7 +86,7 @@
 	};
 
 	var changeColor = function(elem, color) {
-		if (color !== undefined || color === "") {
+		if (color !== undefined || color !== "") {
 			elem.style.background = color;
 		}
 	};
@@ -121,28 +127,39 @@
 		}
 	};
 
+	var calcPercentage = function(done, needed) {
+		var percentage = done === needed ? 100 : Math.round(100 * done / needed);
+		return done + " / " + needed + " (" + percentage + "%)";
+	};
+
 	var showStatistic = function() {
 		rows[0].innerHTML += "<th class=\"st_score\">%</th>";
+		var fullDone = 0;
+		var fullNeeded = 0;
+		var curDone, curNeeded;
 		for (var j = firstRow; j < lastRow; j++) {
 			var row = rows[j].childNodes;
 
-			var done = 0;
-			var needed = 0;
+			curDone = 0;
+			curNeeded = 0;
 			for (var i = firstCol; i < lastCol; i++) {
 				if (isColSolvable(i)) {
-					needed ++;
-					done += isCellDone(row[i].innerHTML);
+					curNeeded ++;
+					curDone += isCellDone(row[i].innerHTML);
 				}
 			}
-			var percentage = done === needed ? 100 : Math.round(100 * done / needed);
-			rows[j].innerHTML += "<td class=\"st_score\">" + done + " / " + needed + " (" + percentage + "%)</td>";
+			rows[j].innerHTML += "<td class=\"st_score\">" + calcPercentage(curDone, curNeeded) + "</td>";
+
+			fullDone += curDone;
+			fullNeeded += curNeeded;
 		}
-		for (var j = 0; j < 3; j++) {
-			rows[lastRow + j].innerHTML += "<td class=\"st_score\"></td>";
+		rows[lastRow].innerHTML += "<td class=\"st_score\">" + calcPercentage(fullDone, fullNeeded) + "</td>";
+		for (var j = lastRow + 1; j < rows.length; j++) {
+			rows[j].innerHTML += "<td class=\"st_score\">&nbsp;</td>";
 		}
 	};
 
-	var hideEmptyCols = function() {
+	var hideCols = function(hideAll) {
 		var lastToHide = 0;
 		for (var i = lastCol - 1; i >= firstCol; i--) {
 			if (isColSolvable(i)) {
@@ -157,7 +174,7 @@
 			if (isColSolvable(i)) {
 				continue;
 			}
-			if (successRow[i].innerHTML !== "0") {
+			if (successRow[i].innerHTML !== "0" && !hideAll) {
 				continue;
 			}
 			for (var j = 0; j < rows.length; j++) {
@@ -166,19 +183,41 @@
 		}
 	};
 
-	if (needToHideEmptyCols) {
-		hideEmptyCols();
+	var attachTaskLinks = function() {
+		var linkPrefix = window.location.href.replace("standings", "view-problem-submit") + "?prob_id=";
+		for (var i = firstCol; i < lastCol; i++) {
+			header[i].innerHTML = "<a href=\"" + linkPrefix + (i - 1) + "\">" + header[i].innerHTML + "</a>";
+
+			var newElem = header[i].childNodes[0];
+			newElem.style.textDecoration = "none";
+			newElem.style.color = "black";
+		}
+	};
+
+	var attachNameLinks = function() {
+		for (var i = firstRow; i < lastRow; i++) {
+			names[i].innerHTML = "<a>" + names[i].innerHTML + "</a>";
+
+			var newElem = names[i].childNodes[0];
+			newElem.style.cursor = "pointer";
+			newElem.onclick = highlight.bind(this, i);
+		}
+	};
+
+	if (needToHideEmptyCols || needToHideAllCols) {
+		hideCols(needToHideAllCols);
 	}
 
 	if (needToShowStatistic) {
 		showStatistic();
 	}
 
-	if (needToAttachLinks) {
-		for (var i = firstRow; i < lastRow; i++) {
-			names[i].innerHTML = "<a>" + names[i].innerHTML + "</a>";
-			names[i].childNodes[0].onclick = highlight.bind(this, i);
-		}
+	if (needToAttachTaskLinks) {
+		attachTaskLinks();
+	}
+
+	if (needToAttachNameLinks) {
+		attachNameLinks();
 	}
 
 	for (var i = 0; i < autocall.length; i++) {
