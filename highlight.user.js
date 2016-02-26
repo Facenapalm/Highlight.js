@@ -6,7 +6,7 @@
 // @include     https://cmc.ejudge.ru/ej/client/standings/*
 // @author      Listov Anton
 // @license     WTFPL (http://www.wtfpl.net/about/). 
-// @version     2.3b
+// @version     2.4
 // @grant       none
 // ==/UserScript==
 
@@ -16,6 +16,7 @@
 	//customization: undefined values will be ignored
 	var colorDefault = "#fbffbd";
 	var colorCompleted = "#b9ffa7";
+	var colorPreview = "#b9ffa7";
 	var colorTried = "#ffac4e";
 	var colorSkipped = "#ff5e3b";
 
@@ -26,6 +27,8 @@
 	var needToAttachNameLinks = true;
 	var needToAttachTaskLinks = true;
 	var needToShowStatistic = true;
+
+	var alwaysLinkToUp = true;
 
 	var textHide = "Hide";
 	var textAll = "all";
@@ -87,12 +90,38 @@
 		}
 	};
 
+	var getColNumber = function(searchText) {
+		for (var i = firstCol; i < lastCol; i++) {
+			if (header[i].innerHTML.indexOf(searchText) !== -1) {
+				return i;
+			}
+		}
+		return -1;
+	};
+
+	var getColPair = function(colNum) {
+		var matchTable = {
+			"mz": "up",
+			"kr": "ku",
+			"up": "mz",
+			"ku": "kr"
+		};
+
+		var colName = header[colNum].innerHTML;
+		var parced = /(mz|kr|up|ku)(\d\d-\d)/.exec(colName);
+		return getColNumber(matchTable[parced[1]] + parced[2]);
+	};
+
 	var isColSolvable = function(index) {
 		return header[index].innerHTML.search(/(ku|up)\d\d-\d/) !== -1;
 	};
 
 	var isCellDone = function(cellText) {
 		return cellText.indexOf("<b>") !== -1;
+	};
+
+	var isCellPreview = function(cell) {
+		return cell.bgColor.toLowerCase() === "#99cc99";
 	};
 
 	var isCellSkipped = function(cellText) {
@@ -118,7 +147,7 @@
 			row.style.background = "";
 
 			row = row.childNodes;
-			for(var i = 0; i < row.length; i++) {
+			for (var i = 0; i < row.length; i++) {
 				row[i].style.background = "";
 			}
 
@@ -134,7 +163,9 @@
 		for (var i = firstCol; i < lastCol; i++) {
 			var cell = row[i].innerHTML;
 			if (isColSolvable(i)) {
-				if (isCellDone(cell)) {
+				if (isCellPreview(row[i])) {
+					changeColor(row[i], colorPreview);
+				} else if (isCellDone(cell)) {
 					changeColor(row[i], colorCompleted);
 				} else if (isCellSkipped(cell)) {
 					changeColor(row[i], colorSkipped);
@@ -231,12 +262,12 @@
 	var showLinkDesign = function(element) {
 		element.style.textDecoration = "";
 		element.style.color = "";
-	}
+	};
 
 	var addHideButtons = function() {
 		var hideButtons = document.createElement("p");
 		hideButtons.style.font.fontsize = "14px";
-		hideButtons.innerHTML = textHide + ": <a>" + textAll + "</a> / <a>" + textEmpty + "</a> / <a>" + textNothing + "</a>.";
+		hideButtons.innerHTML = textHide + ": <a>" + textAll + "</a> / <a>" + textEmpty + "</a> / <a>" + textNothing + "</a>";
 
 		var hideAllButton = hideButtons.childNodes[1];
 		var hideEmptyButton = hideButtons.childNodes[3];
@@ -285,7 +316,14 @@
 	var attachTaskLinks = function() {
 		var linkPrefix = window.location.href.replace("standings", "view-problem-submit") + "?prob_id=";
 		for (var i = firstCol; i < lastCol; i++) {
-			header[i].innerHTML = "<a href=\"" + linkPrefix + (i - 1) + "\">" + header[i].innerHTML + "</a>";
+			var taskNum = -1;
+			if (alwaysLinkToUp && !isColSolvable(i)) {
+				taskNum = getColPair(i);
+				taskNum = taskNum === -1 ? i : taskNum;
+			} else {
+				taskNum = i;
+			}
+			header[i].innerHTML = "<a href=\"" + linkPrefix + (taskNum - 1) + "\">" + header[i].innerHTML + "</a>";
 			hideLinkDesign(header[i].childNodes[0]);
 		}
 	};
