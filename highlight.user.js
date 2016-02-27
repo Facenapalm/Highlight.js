@@ -6,7 +6,7 @@
 // @include     https://cmc.ejudge.ru/ej/client/standings/*
 // @author      Listov Anton
 // @license     WTFPL (http://www.wtfpl.net/about/). 
-// @version     2.4
+// @version     3.0
 // @grant       none
 // ==/UserScript==
 
@@ -26,6 +26,7 @@
 
 	var needToAttachNameLinks = true;
 	var needToAttachTaskLinks = true;
+	var needToAttachSortLinks = true;
 	var needToShowStatistic = true;
 
 	var alwaysLinkToUp = true;
@@ -56,12 +57,10 @@
 	}
 
 	var names = document.getElementsByClassName("st_team");
+	var tbody = names[0].parentElement.parentElement; //td -> tr -> tbody
+	var rows = tbody.rows;
 	var firstRow = 1; //except header
 	var lastRow = names.length - 3; //except "total", "success" and "%" rows
-	var rows = [];
-	for (var i = 0; i < names.length; i++) {
-		rows[i] = names[i].parentElement;
-	}
 
 	var header = rows[0].childNodes;
 	var firstCol = 2; //except "place" and "user" columns
@@ -70,6 +69,7 @@
 	var highlighted = [];
 
 
+	//common
 	var getRowNumber = function(row) {
 		if (typeof row === "undefined") {
 			var titleText = document.getElementsByClassName("main_phrase")[0].innerHTML;
@@ -112,8 +112,9 @@
 		return getColNumber(matchTable[parced[1]] + parced[2]);
 	};
 
+	//highlight
 	var isColSolvable = function(index) {
-		return header[index].innerHTML.search(/(ku|up)\d\d-\d/) !== -1;
+		return header[index].innerHTML.search(/(?:ku|up)\d\d-\d/) !== -1;
 	};
 
 	var isCellDone = function(cellText) {
@@ -128,9 +129,12 @@
 		return cellText === "&nbsp;";
 	};
 
-	var changeColor = function(elem, color) {
-		if (color !== undefined || color !== "") {
-			elem.style.background = color;
+	var dehighlight = function(row) {
+		row.style.background = "";
+
+		row = row.childNodes;
+		for (var i = 0; i < row.length; i++) {
+			row[i].style.background = "";
 		}
 	};
 
@@ -143,19 +147,18 @@
 
 		var pos = highlighted.indexOf(rowNumber);
 		if (pos !== -1) {
-			//dehighlight
-			row.style.background = "";
-
-			row = row.childNodes;
-			for (var i = 0; i < row.length; i++) {
-				row[i].style.background = "";
-			}
-
+			dehighlight(row);
 			highlighted.splice(pos, 1);
 			return;
 		} else {
 			highlighted.push(rowNumber);
 		}
+
+		var changeColor = function(elem, color) {
+			if (color !== undefined || color !== "") {
+				elem.style.background = color;
+			}
+		};
 
 		changeColor(row, colorDefault);
 
@@ -176,12 +179,13 @@
 		}
 	};
 
-	var calcPercentage = function(done, needed) {
-		var percentage = done === needed ? 100 : Math.round(100 * done / needed);
-		return done + " / " + needed + " (" + percentage + "%)";
-	};
-
+	//other
 	var showStatistic = function() {
+		var calcPercentage = function(done, needed) {
+			var percentage = done === needed ? 100 : Math.round(100 * done / needed);
+			return done + " / " + needed + " (" + percentage + "%)";
+		};
+
 		var curCell = document.createElement("th");
 		curCell.classList.add("st_score");
 		curCell.innerHTML = "%";
@@ -210,7 +214,6 @@
 			rows[j].appendChild(curCell);
 		}
 
-
 		curCell = document.createElement("td");
 		curCell.classList.add("st_score");
 		curCell.innerHTML = calcPercentage(fullDone, fullNeeded).toString();
@@ -219,6 +222,7 @@
 		for (var j = lastRow + 1; j < rows.length; j++) {
 			curCell = document.createElement("td");
 			curCell.classList.add("st_score");
+			curCell.innerHTML = "&nbsp";
 			rows[j].appendChild(curCell);
 		}
 	};
@@ -254,6 +258,52 @@
 		}
 	};
 
+	var sortTable = function(column, comparer, ascending) {
+		var sortedAscending = true;
+		var sortedDescending = true;
+		for (var j = firstRow; j < lastRow - 1; j++) {
+			var relation = comparer(rows[j].childNodes[column].innerHTML,
+			                        rows[j + 1].childNodes[column].innerHTML);
+			sortedAscending = sortedAscending && relation <= 0;
+			sortedDescending = sortedDescending && relation >= 0;
+		}
+
+		if (sortedAscending && sortedDescending) {
+			return;
+		}
+		if (sortedAscending) {
+			ascending = false;
+		}
+		if (sortedDescending) {
+			ascending = true;
+		}
+
+		for (var j = firstRow; j < lastRow - 1; j++) {
+			var max = j;
+			for (var i = j + 1; i < lastRow; i++) {
+				var relation = comparer(rows[i].childNodes[column].innerHTML,
+				                        rows[max].childNodes[column].innerHTML);
+				relation = ascending ? -relation : relation;
+				if (relation > 0) {
+					max = i;
+				}
+			}
+			if (max === j) {
+				continue;
+			}
+
+			tbody.insertBefore(rows[max], rows[j]);
+			for (var i = 0; i < highlighted.length; i++) {
+				if (highlighted[i] >= j && highlighted[i] < max) {
+					highlighted[i]++;
+				} else if (highlighted[i] === max) {
+					highlighted[i] = j;
+				}
+			}
+		}
+	};
+
+	//interface improving
 	var hideLinkDesign = function(element) {
 		element.style.textDecoration = "none";
 		element.style.color = "black";
@@ -262,6 +312,18 @@
 	var showLinkDesign = function(element) {
 		element.style.textDecoration = "";
 		element.style.color = "";
+	};
+
+	var wrapInLink = function(element, hideDesign) {
+		element.innerHTML = "<a>" + element.innerHTML + "</a>";
+
+		var newElem = element.childNodes[0];
+		newElem.style.cursor = "pointer";
+		if (hideDesign) {
+			hideLinkDesign(newElem);
+		}
+
+		return newElem;
 	};
 
 	var addHideButtons = function() {
@@ -313,6 +375,35 @@
 		container.appendChild(hideButtons);
 	};
 
+	var attachSortLinks = function() {
+		var compareNumbers = function(cell1, cell2) {
+			var numberGetter = /\d+/;
+			var num1 = numberGetter.exec(cell1);
+			var num2 = numberGetter.exec(cell2);
+			if (num1 === null || num2 === null) {
+				return 0;
+			} else {
+				return Number(num1[0]) - Number(num2[0]);
+			}
+		};
+		var compareStrings = function(cell1, cell2) {
+			return cell1.localeCompare(cell2);
+		};
+
+		var bindLink = function(column, comparer, ascending) {
+			var link = wrapInLink(header[column], true);
+			link.onclick = sortTable.bind(null, column, comparer, ascending);
+		};
+
+		bindLink(0, compareNumbers, true);
+		bindLink(1, compareStrings, true);
+		bindLink(lastCol, compareNumbers, false);
+		bindLink(lastCol + 1, compareNumbers, false);
+		if (needToShowStatistic) {
+			bindLink(lastCol + 2, compareNumbers, false);
+		}
+	};
+
 	var attachTaskLinks = function() {
 		var linkPrefix = window.location.href.replace("standings", "view-problem-submit") + "?prob_id=";
 		for (var i = firstCol; i < lastCol; i++) {
@@ -323,18 +414,15 @@
 			} else {
 				taskNum = i;
 			}
-			header[i].innerHTML = "<a href=\"" + linkPrefix + (taskNum - 1) + "\">" + header[i].innerHTML + "</a>";
-			hideLinkDesign(header[i].childNodes[0]);
+			var link = wrapInLink(header[i], true);
+			link.href = linkPrefix + (taskNum - 1);
 		}
 	};
 
 	var attachNameLinks = function() {
 		for (var i = firstRow; i < lastRow; i++) {
-			names[i].innerHTML = "<a>" + names[i].innerHTML + "</a>";
-
-			var newElem = names[i].childNodes[0];
-			newElem.style.cursor = "pointer";
-			newElem.onclick = highlight.bind(this, i);
+			var newElem = wrapInLink(names[i], false);
+			newElem.onclick = highlight.bind(null, newElem.innerHTML);
 		}
 	};
 
@@ -365,6 +453,10 @@
 
 	if (needToAttachTaskLinks) {
 		attachTaskLinks();
+	}
+
+	if (needToAttachSortLinks) {
+		attachSortLinks();
 	}
 
 	if (needToAttachNameLinks) {
