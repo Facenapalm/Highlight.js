@@ -6,7 +6,7 @@
 // @include     https://cmc.ejudge.ru/ej/client/standings/*
 // @author      Listov Anton
 // @license     WTFPL (http://www.wtfpl.net/about/). 
-// @version     3.0
+// @version     3.0b
 // @grant       none
 // ==/UserScript==
 
@@ -328,7 +328,7 @@
 
 	var addHideButtons = function() {
 		var hideButtons = document.createElement("p");
-		hideButtons.style.font.fontsize = "14px";
+		hideButtons.style.fontSize = "14px";
 		hideButtons.innerHTML = textHide + ": <a>" + textAll + "</a> / <a>" + textEmpty + "</a> / <a>" + textNothing + "</a>";
 
 		var hideAllButton = hideButtons.childNodes[1];
