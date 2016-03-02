@@ -6,7 +6,7 @@
 // @include     https://cmc.ejudge.ru/ej/client/standings/*
 // @author      Listov Anton
 // @license     WTFPL (http://www.wtfpl.net/about/). 
-// @version     3.1
+// @version     3.1b
 // @grant       none
 // ==/UserScript==
 
@@ -217,6 +217,7 @@
 
 		curCell = document.createElement("td");
 		curCell.classList.add("st_score");
+		curCell.style.whiteSpace = "nowrap";
 		curCell.innerHTML = calcPercentage(fullDone, fullNeeded).toString();
 		rows[lastRow].appendChild(curCell);
 
