@@ -6,7 +6,7 @@
 // @include     https://cmc.ejudge.ru/ej/client/standings/*
 // @author      Listov Anton
 // @license     WTFPL (http://www.wtfpl.net/about/). 
-// @version     3.0b
+// @version     3.1
 // @grant       none
 // ==/UserScript==
 
@@ -210,6 +210,7 @@
 
 			curCell = document.createElement("td");
 			curCell.classList.add("st_score");
+			curCell.style.whiteSpace = "nowrap";
 			curCell.innerHTML = calcPercentage(curDone, curNeeded).toString();
 			rows[j].appendChild(curCell);
 		}
@@ -423,6 +424,7 @@
 		for (var i = firstRow; i < lastRow; i++) {
 			var newElem = wrapInLink(names[i], false);
 			newElem.onclick = highlight.bind(null, newElem.innerHTML);
+			newElem.style.whiteSpace = "nowrap";
 		}
 	};
 
