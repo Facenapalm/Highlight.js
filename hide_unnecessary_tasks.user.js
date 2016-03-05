@@ -6,14 +6,15 @@
 // @include     https://cmc.ejudge.ru/ej/client/*
 // @author      Mashkoff Tony
 // @license     WTFPL (http://www.wtfpl.net/about/).
-// @version     0.3a
+// @version     0.1b
 // @grant       none
 // ==/UserScript==
 
-(function(){
+var modify = [];
+
+(function init(){
     "use strict";
 
-    var modify = [];
     var solved = document.querySelectorAll('.probOk, .probTrans');
     var bad = document.querySelectorAll('.probBad');
     var empty = document.querySelectorAll('.probEmpty');
@@ -55,8 +56,42 @@
         }
     }
 
-    n = modify.length;
+    var probList = document.getElementById('probNavRightList');
+    probList.insertBefore(OptionElem(), probList.firstChild);
+})();
+
+function hide() {
+    var n = modify.length;
     for (i = 0; i < n; i++) {
         modify[i].style.display = 'none';
     }
-})();
+}
+
+function show() {
+    var n = modify.length;
+    for (i = 0; i < n; i++) {
+        modify[i].style.display = 'block';
+    }
+}
+
+function MyBtn(title, action) {
+    var btn = document.createElement('a');
+    btn.href = '#';
+    btn.onclick = action;
+    btn.innerHTML = title;
+    btn.style.color = 'rgb(25, 88, 33)';
+    return btn;
+}
+
+function OptionElem() {
+    var elem = document.createElement('div');
+    elem.style.padding = '10px 0';
+    elem.style.fontSize = '14px';
+    elem.style.textAlign = 'center';
+    elem.appendChild(document.createTextNode('Отображать:'));
+    elem.appendChild(document.createElement('br'));
+    elem.appendChild(MyBtn('все', show));
+    elem.appendChild(document.createTextNode(' / '));
+    elem.appendChild(MyBtn('нужные', hide));
+    return elem;
+}
