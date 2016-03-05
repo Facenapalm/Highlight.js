@@ -6,55 +6,57 @@
 // @include     https://cmc.ejudge.ru/ej/client/*
 // @author      Mashkoff Tony
 // @license     WTFPL (http://www.wtfpl.net/about/).
-// @version     0.2a
+// @version     0.3a
 // @grant       none
 // ==/UserScript==
 
 (function(){
-var modify = [];
-var solved = document.querySelectorAll('.probOk, .probTrans');
-var bad = document.querySelectorAll('.probBad');
-var empty = document.querySelectorAll('.probEmpty');
-var solvedPrNames = [], solvedKrNames = [];
-var regexp = { 'mz' : /mz\d\d-*/, 'up' : /up\d\d-*/, 'kr' : /kr\d\d-*/, 'ku' : /ku\d\d-*/ };
+    "use strict";
 
-var n = solved.length;
-for (var i = 0; i < n; i++) {
-    var name = solved[i].firstChild.innerHTML;
-    if (regexp['mz'].test(name)) {
-        solvedPrNames.push(name.substr(2));
-    } else if (regexp['kr'].test(name)) {
-        solvedKrNames.push(name.substr(2));
-    }
-    modify.push(solved[i]);
-}
+    var modify = [];
+    var solved = document.querySelectorAll('.probOk, .probTrans');
+    var bad = document.querySelectorAll('.probBad');
+    var empty = document.querySelectorAll('.probEmpty');
+    var solvedPrNames = [], solvedKrNames = [];
+    var regexp = { mz : /mz\d\d-\d*/, up : /up\d\d-\d*/, kr : /kr\d\d-\d*/, ku : /ku\d\d-\d*/ };
 
-n = empty.length;
-for (i = 0; i < n; i++) {
-    name = empty[i].firstChild.innerHTML;
-    if (regexp['mz'].test(name) || regexp['kr'].test(name)) {
-        modify.push(empty[i]);
-    } else if (regexp['up'].test(name)) {
-        if (solvedPrNames.indexOf(name.substr(2)) > 0) {
-            modify.push(empty[i]);
+    var n = solved.length;
+    for (var i = 0; i < n; i++) {
+        var name = solved[i].firstChild.innerHTML;
+        if (regexp.mz.test(name)) {
+            solvedPrNames.push(name.substr(2));
+        } else if (regexp.kr.test(name)) {
+            solvedKrNames.push(name.substr(2));
         }
-    } else if (regexp['ku'].test(name)) {
-        if (solvedKrNames.indexOf(name.substr(2)) > 0) {
+        modify.push(solved[i]);
+    }
+
+    n = empty.length;
+    for (i = 0; i < n; i++) {
+        name = empty[i].firstChild.innerHTML;
+        if (regexp.mz.test(name) || regexp.kr.test(name)) {
             modify.push(empty[i]);
+        } else if (regexp.up.test(name)) {
+            if (solvedPrNames.indexOf(name.substr(2)) > 0) {
+                modify.push(empty[i]);
+            }
+        } else if (regexp.ku.test(name)) {
+            if (solvedKrNames.indexOf(name.substr(2)) > 0) {
+                modify.push(empty[i]);
+            }
         }
     }
-}
 
-n = bad.length;
-for (i = 0; i < n; i++) {
-    name = bad[i].firstChild.innerHTML;
-    if (regexp['mz'].test(name) || regexp['kr'].test(name)) {
-        modify.push(bad[i]);
+    n = bad.length;
+    for (i = 0; i < n; i++) {
+        name = bad[i].firstChild.innerHTML;
+        if (regexp.mz.test(name) || regexp.kr.test(name)) {
+            modify.push(bad[i]);
+        }
     }
-}
 
-n = modify.length;
-for (i = 0; i < n; i++) {
-    modify[i].style.display = 'none';
-}
+    n = modify.length;
+    for (i = 0; i < n; i++) {
+        modify[i].style.display = 'none';
+    }
 })();
