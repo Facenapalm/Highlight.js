@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Hide Unnecessary Problems
 // @namespace   EjudgeFE
-// @description Скрипт оставляет в списке задач в Ejudge видимыми только те, которые необходимо решить.
+// @description Скрипт оставляет в списке задач в Ejudge видимыми только нерешенные задачи.
 // @include     https://unicorn.ejudge.ru/ej/client/*
 // @include     https://cmc.ejudge.ru/ej/client/*
 // @author      Mashkoff Tony
