@@ -58,6 +58,8 @@ var modify = [];
 
     var probList = document.getElementById('probNavRightList');
     probList.insertBefore(OptionElem(), probList.firstChild);
+
+    hide();
 })();
 
 function hide() {
