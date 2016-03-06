@@ -6,14 +6,29 @@
 // @include     https://cmc.ejudge.ru/ej/client/*
 // @author      Mashkoff Tony
 // @license     WTFPL (http://www.wtfpl.net/about/).
-// @version     0.1b
+// @version     1.1
 // @grant       none
 // ==/UserScript==
 
 var modify = [];
+var locales = {
+    ru : {
+        mode : 'Отображать',
+        all : 'все',
+        necessary : 'нужные'
+    },
+    en : {
+        mode : 'View',
+        all : 'all',
+        necessary : 'necessary'
+    }
+};
+var locale;
 
 (function init(){
     "use strict";
+
+    identifyLocale();
 
     var solved = document.querySelectorAll('.probOk, .probTrans');
     var bad = document.querySelectorAll('.probBad');
@@ -38,11 +53,11 @@ var modify = [];
         if (regexp.mz.test(name) || regexp.kr.test(name)) {
             modify.push(empty[i]);
         } else if (regexp.up.test(name)) {
-            if (solvedPrNames.indexOf(name.substr(2)) > 0) {
+            if (solvedPrNames.indexOf(name.substr(2)) > -1) {
                 modify.push(empty[i]);
             }
         } else if (regexp.ku.test(name)) {
-            if (solvedKrNames.indexOf(name.substr(2)) > 0) {
+            if (solvedKrNames.indexOf(name.substr(2)) > -1) {
                 modify.push(empty[i]);
             }
         }
@@ -90,10 +105,18 @@ function OptionElem() {
     elem.style.padding = '10px 0';
     elem.style.fontSize = '14px';
     elem.style.textAlign = 'center';
-    elem.appendChild(document.createTextNode('Отображать:'));
+    elem.appendChild(document.createTextNode(locale.mode));
     elem.appendChild(document.createElement('br'));
-    elem.appendChild(MyBtn('все', show));
+    elem.appendChild(MyBtn(locale.all, show));
     elem.appendChild(document.createTextNode(' / '));
-    elem.appendChild(MyBtn('нужные', hide));
+    elem.appendChild(MyBtn(locale.necessary, hide));
     return elem;
+}
+
+function identifyLocale() {
+    if (document.getElementsByClassName('contest_actions_item')[0].firstChild.innerHTML.indexOf('Настройки') > -1) {
+        locale = locales.ru;
+    } else {
+        locale = locales.en;
+    }
 }
