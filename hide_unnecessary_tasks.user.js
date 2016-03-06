@@ -4,9 +4,10 @@
 // @description Скрипт оставляет в списке задач в Ejudge видимыми только нерешенные задачи.
 // @include     https://unicorn.ejudge.ru/ej/client/*
 // @include     https://cmc.ejudge.ru/ej/client/*
+// @exclude     https://cmc.ejudge.ru/ej/client/standings/*
 // @author      Mashkoff Tony
 // @license     WTFPL (http://www.wtfpl.net/about/).
-// @version     1.1
+// @version     1.2
 // @grant       none
 // ==/UserScript==
 
@@ -24,50 +25,94 @@ var locales = {
     }
 };
 var locale;
+var regexp = { mz : /mz\d\d-\d*/, up : /up\d\d-\d*/, kr : /kr\d\d-\d*/, ku : /ku\d\d-\d*/ };
 
 (function init(){
     "use strict";
 
     identifyLocale();
 
+    var classes = {
+        mz : [],
+        kr : [],
+        up : [],
+        ku : [],
+        other : []
+    };
+
+    function classify(pool) {
+        var n = pool.length;
+        for (var i = 0; i < n; i++) {
+            var name = pool[i].firstChild.innerHTML;
+            var tmp = undefined;
+            for (var type in regexp) {
+                if (regexp[type].test(name)) {
+                    var j = parseInt(name.substr(2, 4));
+                    var k = parseInt(name.substr(5));
+                    tmp = type;
+                    break;
+                }
+            }
+            if (tmp != undefined) {
+                if (!classes[tmp].hasOwnProperty(j)) {
+                    classes[tmp][j] = [];
+                }
+                classes[tmp][j][k] = pool[i];
+            } else {
+                classes.other.push(pool[i]);
+            }
+        }
+    }
+
     var solved = document.querySelectorAll('.probOk, .probTrans');
     var bad = document.querySelectorAll('.probBad');
     var empty = document.querySelectorAll('.probEmpty');
-    var solvedPrNames = [], solvedKrNames = [];
-    var regexp = { mz : /mz\d\d-\d*/, up : /up\d\d-\d*/, kr : /kr\d\d-\d*/, ku : /ku\d\d-\d*/ };
 
-    var n = solved.length;
-    for (var i = 0; i < n; i++) {
-        var name = solved[i].firstChild.innerHTML;
-        if (regexp.mz.test(name)) {
-            solvedPrNames.push(name.substr(2));
-        } else if (regexp.kr.test(name)) {
-            solvedKrNames.push(name.substr(2));
-        }
-        modify.push(solved[i]);
-    }
+    classify(solved);
+    classify(bad);
+    classify(empty);
+    console.log(classes);
 
-    n = empty.length;
-    for (i = 0; i < n; i++) {
-        name = empty[i].firstChild.innerHTML;
-        if (regexp.mz.test(name) || regexp.kr.test(name)) {
-            modify.push(empty[i]);
-        } else if (regexp.up.test(name)) {
-            if (solvedPrNames.indexOf(name.substr(2)) > -1) {
-                modify.push(empty[i]);
+    for (var type in classes) {
+        var pairedType = getPairedType(type);
+        if (type != 'mz' && type != 'kr') {
+            for (var i in classes[type]) {
+                if (type != 'other') {
+                    for (var j in classes[type][i]) {
+                        var elem = classes[type][i][j];
+                        if ((elem.classList[0] == 'probOk' || elem.classList[0] == 'probTrans')) {
+                            modify.push(elem);
+                            if (classes[pairedType].hasOwnProperty(i) &&
+                                classes[pairedType][i].hasOwnProperty(j)) {
+                                modify.push(classes[pairedType][i][j]);
+                            }
+                        }
+                    }
+                } else {
+                    var elem = classes[type][i];
+                    if (elem.classList[0] == 'probOk' || elem.classList[0] == 'probTrans') {
+                        modify.push(elem);
+                    }
+                }
             }
-        } else if (regexp.ku.test(name)) {
-            if (solvedKrNames.indexOf(name.substr(2)) > -1) {
-                modify.push(empty[i]);
+        } else {
+            for (var i in classes[type]) {
+                for (var j in classes[type][i]) {
+                    var elem = classes[type][i][j];
+                    var nextContestExists = classes[type].hasOwnProperty(parseInt(i) + 1);
+                    if ((elem.classList[0] == 'probOk' || elem.classList[0] == 'probTrans') &&
+                        classes[pairedType].hasOwnProperty(i) &&
+                        classes[pairedType][i].hasOwnProperty(j)) {
+                        modify.push(elem);
+                        modify.push(classes[pairedType][i][j]);
+                    }
+                    if (classes[pairedType].hasOwnProperty(i) &&
+                        classes[pairedType][i].hasOwnProperty(j) ||
+                        nextContestExists) {
+                        modify.push(elem);
+                    }
+                }
             }
-        }
-    }
-
-    n = bad.length;
-    for (i = 0; i < n; i++) {
-        name = bad[i].firstChild.innerHTML;
-        if (regexp.mz.test(name) || regexp.kr.test(name)) {
-            modify.push(bad[i]);
         }
     }
 
@@ -118,5 +163,20 @@ function identifyLocale() {
         locale = locales.ru;
     } else {
         locale = locales.en;
+    }
+}
+
+function getPairedType(type) {
+    switch (type) {
+        case 'mz':
+            return 'up';
+        case 'up':
+            return 'mz';
+        case 'kr':
+            return 'ku';
+        case 'ku':
+            return 'kr';
+        default:
+            return type;
     }
 }
