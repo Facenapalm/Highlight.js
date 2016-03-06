@@ -6,7 +6,7 @@
 // @include     https://cmc.ejudge.ru/ej/client/standings/*
 // @author      Listov Anton
 // @license     WTFPL (http://www.wtfpl.net/about/). 
-// @version     3.1b
+// @version     3.1c
 // @grant       none
 // ==/UserScript==
 
@@ -100,6 +100,10 @@
 	};
 
 	var getColPair = function(colNum) {
+		if (colNum === -1) {
+			return -1;
+		}
+
 		var matchTable = {
 			"mz": "up",
 			"kr": "ku",
@@ -108,8 +112,12 @@
 		};
 
 		var colName = header[colNum].innerHTML;
-		var parced = /(mz|kr|up|ku)(\d\d-\d)/.exec(colName);
-		return getColNumber(matchTable[parced[1]] + parced[2]);
+		var parsed = /(mz|kr|up|ku)(\d\d-\d)/.exec(colName);
+		if (parsed === null) {
+			return -1;
+		} else {
+			return getColNumber(matchTable[parsed[1]] + parsed[2]);
+		}
 	};
 
 	//highlight
