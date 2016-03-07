@@ -7,7 +7,7 @@
 // @exclude     https://cmc.ejudge.ru/ej/client/standings/*
 // @author      Mashkoff Tony
 // @license     WTFPL (http://www.wtfpl.net/about/).
-// @version     1.3
+// @version     1.4
 // @grant       none
 // ==/UserScript==
 
@@ -149,7 +149,7 @@ function OptionElem() {
 }
 
 function identifyLocale() {
-    if (document.getElementsByClassName('contest_actions_item')[0].firstChild.innerHTML.indexOf('Настройки') > -1) {
+    if (document.getElementsByClassName('contest_actions_item')[0].innerHTML.indexOf('Настройки') > -1) {
         locale = locales.ru;
     } else {
         locale = locales.en;
