@@ -7,7 +7,7 @@
 // @exclude     https://cmc.ejudge.ru/ej/client/standings/*
 // @author      Mashkoff Tony
 // @license     WTFPL (http://www.wtfpl.net/about/).
-// @version     1.2
+// @version     1.3
 // @grant       none
 // ==/UserScript==
 
@@ -27,7 +27,7 @@ var locales = {
 var locale;
 var regexp = { mz : /mz\d\d-\d*/, up : /up\d\d-\d*/, kr : /kr\d\d-\d*/, ku : /ku\d\d-\d*/ };
 
-(function init(){
+(function(){
     "use strict";
 
     identifyLocale();
@@ -40,43 +40,33 @@ var regexp = { mz : /mz\d\d-\d*/, up : /up\d\d-\d*/, kr : /kr\d\d-\d*/, ku : /ku
         other : []
     };
 
-    function classify(pool) {
-        var n = pool.length;
-        for (var i = 0; i < n; i++) {
-            var name = pool[i].firstChild.innerHTML;
-            var tmp = undefined;
-            for (var type in regexp) {
-                if (regexp[type].test(name)) {
-                    var j = parseInt(name.substr(2, 4));
-                    var k = parseInt(name.substr(5));
-                    tmp = type;
-                    break;
-                }
-            }
-            if (tmp != undefined) {
-                if (!classes[tmp].hasOwnProperty(j)) {
-                    classes[tmp][j] = [];
-                }
-                classes[tmp][j][k] = pool[i];
-            } else {
-                classes.other.push(pool[i]);
+    var pool = document.querySelectorAll('.probOk, .probTrans, .probBad, .probEmpty');
+    var n = pool.length;
+    for (var i = 0; i < n; i++) {
+        var name = pool[i].firstChild.innerHTML;
+        var tmp = undefined;
+        for (var type in regexp) {
+            if (regexp[type].test(name)) {
+                var j = parseInt(name.substr(2, 4));
+                var k = parseInt(name.substr(5));
+                tmp = type;
+                break;
             }
         }
+        if (tmp != undefined) {
+            if (!classes[tmp].hasOwnProperty(j)) {
+                classes[tmp][j] = [];
+            }
+            classes[tmp][j][k] = pool[i];
+        } else {
+            classes.other.push(pool[i]);
+        }
     }
-
-    var solved = document.querySelectorAll('.probOk, .probTrans');
-    var bad = document.querySelectorAll('.probBad');
-    var empty = document.querySelectorAll('.probEmpty');
-
-    classify(solved);
-    classify(bad);
-    classify(empty);
-    console.log(classes);
 
     for (var type in classes) {
         var pairedType = getPairedType(type);
         if (type != 'mz' && type != 'kr') {
-            for (var i in classes[type]) {
+            for (i in classes[type]) {
                 if (type != 'other') {
                     for (var j in classes[type][i]) {
                         var elem = classes[type][i][j];
@@ -96,10 +86,10 @@ var regexp = { mz : /mz\d\d-\d*/, up : /up\d\d-\d*/, kr : /kr\d\d-\d*/, ku : /ku
                 }
             }
         } else {
-            for (var i in classes[type]) {
+            for (i in classes[type]) {
                 for (var j in classes[type][i]) {
                     var elem = classes[type][i][j];
-                    var nextContestExists = classes[type].hasOwnProperty(parseInt(i) + 1);
+                    var nextContestExists = classes[type].hasOwnProperty((parseInt(i) + 1).toString());
                     if ((elem.classList[0] == 'probOk' || elem.classList[0] == 'probTrans') &&
                         classes[pairedType].hasOwnProperty(i) &&
                         classes[pairedType][i].hasOwnProperty(j)) {
