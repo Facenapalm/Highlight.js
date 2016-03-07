@@ -6,7 +6,7 @@
 // @include     https://cmc.ejudge.ru/ej/client/standings/*
 // @author      Listov Anton
 // @license     WTFPL (http://www.wtfpl.net/about/). 
-// @version     3.1c
+// @version     3.2
 // @grant       none
 // ==/UserScript==
 
@@ -31,10 +31,19 @@
 
 	var alwaysLinkToUp = true;
 
-	var textHide = "Hide";
-	var textAll = "all";
-	var textEmpty = "empty";
-	var textNothing = "nothing";
+	var enLocale = {
+		"hide": "Hide",
+		"all": "all",
+		"empty": "empty",
+		"nothing": "nothing"
+	};
+
+	var ruLocale = {
+		"hide": "Скрыть",
+		"all": "всё",
+		"empty": "пустые",
+		"nothing": "ничего"
+	};
 
 	/* highlight function will be automatically called for each of these arguments, where:
 	 * highlight(undefined), same to highlight() - highlights you
@@ -54,6 +63,11 @@
 	}
 	if (document.getElementById("highlight_copyright") !== null) {
 		return; //script has already changed the page
+	}
+
+	var curLocale = enLocale;
+	if (document.getElementsByTagName("h2")[0].innerHTML.indexOf("Положение участников") !== -1) {
+		curLocale = ruLocale;
 	}
 
 	var names = document.getElementsByClassName("st_team");
@@ -229,7 +243,7 @@
 		curCell.innerHTML = calcPercentage(fullDone, fullNeeded).toString();
 		rows[lastRow].appendChild(curCell);
 
-		for (var j = lastRow + 1; j < rows.length; j++) {
+		for (j = lastRow + 1; j < rows.length; j++) {
 			curCell = document.createElement("td");
 			curCell.classList.add("st_score");
 			curCell.innerHTML = "&nbsp";
@@ -245,10 +259,10 @@
 				break;
 			}
 		}
-		//to prevent hidding current tasks
+		//^ to prevent hidding current tasks
 
 		var successRow = rows[lastRow + 1].childNodes;
-		for (var i = firstCol; i < lastToHide; i++) {
+		for (i = firstCol; i < lastToHide; i++) {
 			if (isColSolvable(i)) {
 				continue;
 			}
@@ -271,9 +285,10 @@
 	var sortTable = function(column, comparer, ascending) {
 		var sortedAscending = true;
 		var sortedDescending = true;
+		var relation;
 		for (var j = firstRow; j < lastRow - 1; j++) {
-			var relation = comparer(rows[j].childNodes[column].innerHTML,
-			                        rows[j + 1].childNodes[column].innerHTML);
+			relation = comparer(rows[j].childNodes[column].innerHTML,
+			                    rows[j + 1].childNodes[column].innerHTML);
 			sortedAscending = sortedAscending && relation <= 0;
 			sortedDescending = sortedDescending && relation >= 0;
 		}
@@ -288,11 +303,11 @@
 			ascending = true;
 		}
 
-		for (var j = firstRow; j < lastRow - 1; j++) {
+		for (j = firstRow; j < lastRow - 1; j++) {
 			var max = j;
 			for (var i = j + 1; i < lastRow; i++) {
-				var relation = comparer(rows[i].childNodes[column].innerHTML,
-				                        rows[max].childNodes[column].innerHTML);
+				relation = comparer(rows[i].childNodes[column].innerHTML,
+				                    rows[max].childNodes[column].innerHTML);
 				relation = ascending ? -relation : relation;
 				if (relation > 0) {
 					max = i;
@@ -303,7 +318,7 @@
 			}
 
 			tbody.insertBefore(rows[max], rows[j]);
-			for (var i = 0; i < highlighted.length; i++) {
+			for (i = 0; i < highlighted.length; i++) {
 				if (highlighted[i] >= j && highlighted[i] < max) {
 					highlighted[i]++;
 				} else if (highlighted[i] === max) {
@@ -337,14 +352,8 @@
 	};
 
 	var addHideButtons = function() {
-		var hideButtons = document.createElement("p");
-		hideButtons.style.fontSize = "14px";
-		hideButtons.innerHTML = textHide + ": <a>" + textAll + "</a> / <a>" + textEmpty + "</a> / <a>" + textNothing + "</a>";
-
-		var hideAllButton = hideButtons.childNodes[1];
-		var hideEmptyButton = hideButtons.childNodes[3];
-		var hideNothingButton = hideButtons.childNodes[5];
-
+		var hideAllButton = document.createElement("a");
+		hideAllButton.innerHTML = curLocale.all;
 		hideAllButton.style.cursor = "pointer";
 		hideAllButton.onclick = function() {
 			hideCols(true);
@@ -354,6 +363,8 @@
 			showLinkDesign(hideNothingButton);
 		};
 
+		var hideEmptyButton = document.createElement("a");
+		hideEmptyButton.innerHTML = curLocale.empty;
 		hideEmptyButton.style.cursor = "pointer";
 		hideEmptyButton.onclick = function() {
 			showCols();
@@ -364,6 +375,8 @@
 			showLinkDesign(hideNothingButton);
 		};
 
+		var hideNothingButton = document.createElement("a");
+		hideNothingButton.innerHTML = curLocale.nothing;
 		hideNothingButton.style.cursor = "pointer";
 		hideNothingButton.onclick = function() {
 			showCols();
@@ -380,6 +393,15 @@
 		} else {
 			hideLinkDesign(hideNothingButton);
 		}
+
+		var hideButtons = document.createElement("p");
+		hideButtons.style.fontSize = "14px";
+		hideButtons.appendChild(document.createTextNode(curLocale.hide + ": "));
+		hideButtons.appendChild(hideAllButton);
+		hideButtons.appendChild(document.createTextNode(" / "));
+		hideButtons.appendChild(hideEmptyButton);
+		hideButtons.appendChild(document.createTextNode(" / "));
+		hideButtons.appendChild(hideNothingButton);
 
 		var container = document.getElementsByClassName("l14")[0];
 		container.appendChild(hideButtons);
@@ -443,7 +465,7 @@
 		var copyright = document.createElement("p");
 		copyright.id = "highlight_copyright";
 		copyright.classList.add("ejudge_copyright");
-		copyright.innerHTML = "<a href=\"" + githubLink + "\">Highlight.js</a> &copy; 2015-2016 Listov Anton.";
+		copyright.innerHTML = "<a href=\"" + githubLink + "\">Highlight.js</a> &copy; 2015-2016 Anton Listov.";
 
 		var footer = document.getElementById("footer");
 		footer.appendChild(copyright);
