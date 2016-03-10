@@ -58,7 +58,17 @@
 
 ![Hide Unnecessary Problems Screenshot](.img/hide.png)
 
+### Submissions Mod
+**[{Установить}][4]** Перерабатывает интерфейс "Посылок":
+- расширяет таблицу так, чтобы каждая посылка занимала одну строку вместо двух;
+- позволяет скрывать все посылки, кроме последних на каждую задачу;
+- позволяет сортировать по названию задачи;
+- визуально выделяет посылки на отдельные задачи.
+
+![Submissions Mod Screenshot](.img/submissionsmod.png)
+
 Все описания также доступны в самих скриптах в поле *@description* и будут отображаться при установке.
 
 [2]: https://github.com/Facenapalm/Highlight.js/raw/master/highlight.user.js
 [3]: https://github.com/Facenapalm/Highlight.js/raw/master/hide_unnecessary_tasks.user.js
+[4]: https://github.com/YaLTeR/Highlight.js/raw/master/SubmissionsMod.user.js
