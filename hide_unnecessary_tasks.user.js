@@ -7,7 +7,7 @@
 // @exclude     https://cmc.ejudge.ru/ej/client/standings/*
 // @author      Mashkoff Tony
 // @license     WTFPL (http://www.wtfpl.net/about/).
-// @version     1.4
+// @version     1.5
 // @grant       none
 // ==/UserScript==
 
@@ -26,6 +26,8 @@ var locales = {
 };
 var locale;
 var regexp = { mz : /mz\d\d-\d*/, up : /up\d\d-\d*/, kr : /kr\d\d-\d*/, ku : /ku\d\d-\d*/ };
+testingInProgressMessage += ' СПОРИМ, НЕ ЗАЙДЕТ?';
+testingCompleted += ' ЗАШЛА? ^_^';
 
 (function(){
     "use strict";
@@ -89,7 +91,7 @@ var regexp = { mz : /mz\d\d-\d*/, up : /up\d\d-\d*/, kr : /kr\d\d-\d*/, ku : /ku
             for (i in classes[type]) {
                 for (var j in classes[type][i]) {
                     var elem = classes[type][i][j];
-                    var nextContestExists = classes[type].hasOwnProperty((parseInt(i) + 1).toString());
+                    var nextContestExists = classes[type].hasOwnProperty( (parseInt(i) + 1).toString() );
                     if ((elem.classList[0] == 'probOk' || elem.classList[0] == 'probTrans') &&
                         classes[pairedType].hasOwnProperty(i) &&
                         classes[pairedType][i].hasOwnProperty(j)) {
@@ -98,7 +100,7 @@ var regexp = { mz : /mz\d\d-\d*/, up : /up\d\d-\d*/, kr : /kr\d\d-\d*/, ku : /ku
                     }
                     if (classes[pairedType].hasOwnProperty(i) &&
                         classes[pairedType][i].hasOwnProperty(j) ||
-                        nextContestExists) {
+                        nextContestExists || isUnavailable(elem)) {
                         modify.push(elem);
                     }
                 }
@@ -110,6 +112,11 @@ var regexp = { mz : /mz\d\d-\d*/, up : /up\d\d-\d*/, kr : /kr\d\d-\d*/, ku : /ku
     probList.insertBefore(OptionElem(), probList.firstChild);
 
     hide();
+
+    var copyright = document.createElement('p');
+    copyright.classList.add('ejudge_copyright');
+    copyright.innerHTML = 'Copyright © 2016 Антон Брызгалов';
+    document.getElementById('footer').appendChild(copyright);
 })();
 
 function hide() {
@@ -169,4 +176,18 @@ function getPairedType(type) {
         default:
             return type;
     }
+}
+
+function isUnavailable(node) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', node.firstChild.href);
+    xhr.onreadystatechange = function() {
+        if (xhr.status == 200 && xhr.responseText.indexOf('action_139', 4000) > 0) {
+            modify.push(node);
+            hide();
+        }
+    };
+    node.appendChild(document.createTextNode('...'));
+    xhr.send();
+    return false;
 }
