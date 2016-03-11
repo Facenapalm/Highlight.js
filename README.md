@@ -67,8 +67,14 @@
 
 ![Submissions Mod Screenshot](.img/submissionsmod.png)
 
+### Highlight Lines
+**[{Установить}][6]** Подсвечивает номера строк, упомянутых в комментарии к решению.
+
+![Submissions Mod Screenshot](.img/highlightlines.png)
+
 Все описания также доступны в самих скриптах в поле *@description* и будут отображаться при установке.
 
 [3]: https://github.com/Facenapalm/Highlight.js/raw/master/highlight.user.js
 [4]: https://github.com/Facenapalm/Highlight.js/raw/master/hide_unnecessary_tasks.user.js
 [5]: https://github.com/YaLTeR/Highlight.js/raw/master/SubmissionsMod.user.js
+[6]: https://github.com/YaLTeR/Highlight.js/raw/master/HighlightLines.user.js
