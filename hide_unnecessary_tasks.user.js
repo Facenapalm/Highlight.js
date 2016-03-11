@@ -5,9 +5,12 @@
 // @include     https://unicorn.ejudge.ru/ej/client/*
 // @include     https://cmc.ejudge.ru/ej/client/*
 // @exclude     https://cmc.ejudge.ru/ej/client/standings/*
+// @exclude     https://cmc.ejudge.ru/ej/client/view-clar/*
+// @exclude     https://cmc.ejudge.ru/ej/client/view-report/*
+// @exclude     https://cmc.ejudge.ru/ej/client/view-source/*
 // @author      Mashkoff Tony
 // @license     WTFPL (http://www.wtfpl.net/about/).
-// @version     1.5
+// @version     1.6
 // @grant       GM_xmlhttpRequest
 // ==/UserScript==
 
@@ -31,7 +34,6 @@ var regexp = { mz : /mz\d\d-\d*/, up : /up\d\d-\d*/, kr : /kr\d\d-\d*/, ku : /ku
 
 (function(){
     "use strict";
-    sendStatistics();
 
     identifyLocale();
 
