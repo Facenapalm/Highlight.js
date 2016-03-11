@@ -1,13 +1,14 @@
 // ==UserScript==
 // @name         HighlightLines
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      0.2
 // @description  Подсветка строк, упомянутых в комментарии к решению в Ejudge.
 // @author       Ivan Molodetskikh
 // @match        https://cmc.ejudge.ru/ej/client/view-source/*
 // @match        https://unicorn.ejudge.ru/ej/client/view-source/*
 // @grant        none
 // @updateURL    https://raw.githubusercontent.com/YaLTeR/Highlight.js/master/HighlightLines.user.js
+// @run-at       document-idle
 // ==/UserScript==
 /* jshint -W097 */
 'use strict';
