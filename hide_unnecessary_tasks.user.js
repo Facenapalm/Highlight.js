@@ -11,7 +11,7 @@
 // @exclude     https://cmc.ejudge.ru/ej/client/view-source/*
 // @author      Mashkoff Tony
 // @license     WTFPL (http://www.wtfpl.net/about/).
-// @grant       GM_xmlhttpRequest
+// @grant       none
 // ==/UserScript==
 
 var modify = [];
