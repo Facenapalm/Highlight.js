@@ -10,7 +10,7 @@
 // @exclude     https://cmc.ejudge.ru/ej/client/view-source/*
 // @author      Mashkoff Tony
 // @license     WTFPL (http://www.wtfpl.net/about/).
-// @version     1.6
+// @version     1.7
 // @grant       GM_xmlhttpRequest
 // ==/UserScript==
 
@@ -184,13 +184,14 @@ function getPairedType(type) {
 function isUnavailable(node) {
     var xhr = new XMLHttpRequest();
     xhr.open('GET', node.firstChild.href);
+    var loadingIndicator = node.appendChild(document.createTextNode('...'));
     xhr.onreadystatechange = function() {
         if (xhr.status == 200 && xhr.responseText.indexOf('action_139', 4000) > 0) {
+            node.removeChild(loadingIndicator);
             modify.push(node);
             hide();
         }
     };
-    node.appendChild(document.createTextNode('...'));
     xhr.send();
     return false;
 }
