@@ -1,5 +1,6 @@
 // ==UserScript==
 // @name        Hide Unnecessary Problems
+// @version     1.7.1
 // @namespace   EjudgeFE
 // @description Скрипт оставляет в списке задач в Ejudge видимыми только нерешенные задачи.
 // @include     https://unicorn.ejudge.ru/ej/client/*
@@ -10,7 +11,6 @@
 // @exclude     https://cmc.ejudge.ru/ej/client/view-source/*
 // @author      Mashkoff Tony
 // @license     WTFPL (http://www.wtfpl.net/about/).
-// @version     1.7
 // @grant       GM_xmlhttpRequest
 // ==/UserScript==
 
