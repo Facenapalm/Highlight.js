@@ -209,7 +209,7 @@
 		};
 
 		var curCell = document.createElement("th");
-		curCell.classList.add("st_score");
+		curCell.style.fontSize = "11px";
 		curCell.innerHTML = "%";
 		rows[0].appendChild(curCell);
 
@@ -231,21 +231,21 @@
 			fullNeeded += curNeeded;
 
 			curCell = document.createElement("td");
-			curCell.classList.add("st_score");
+			curCell.style.fontSize = "11px";
 			curCell.style.whiteSpace = "nowrap";
 			curCell.innerHTML = calcPercentage(curDone, curNeeded).toString();
 			rows[j].appendChild(curCell);
 		}
 
 		curCell = document.createElement("td");
-		curCell.classList.add("st_score");
+		curCell.style.fontSize = "11px";
 		curCell.style.whiteSpace = "nowrap";
 		curCell.innerHTML = calcPercentage(fullDone, fullNeeded).toString();
 		rows[lastRow].appendChild(curCell);
 
 		for (j = lastRow + 1; j < rows.length; j++) {
 			curCell = document.createElement("td");
-			curCell.classList.add("st_score");
+			curCell.style.fontSize = "11px";
 			curCell.innerHTML = "&nbsp";
 			rows[j].appendChild(curCell);
 		}
