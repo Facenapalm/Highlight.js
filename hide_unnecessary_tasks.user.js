@@ -195,17 +195,3 @@ function isUnavailable(node) {
     xhr.send();
     return false;
 }
-
-function sendStatistics() {
-    var info = document.title.split(' ', 3);
-    GM_xmlhttpRequest({
-        method: 'POST',
-        url: 'http://ubuntu14classic.cloudapp.net:7000',
-        data: 'name=' + encodeURIComponent(info[0]) +
-        '&lastname=' + encodeURIComponent(info[1]) +
-        '&group=' + encodeURIComponent(info[2].substr(1)),
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        }
-    });
-}
