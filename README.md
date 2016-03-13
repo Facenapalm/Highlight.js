@@ -70,7 +70,14 @@
 ### Highlight Lines
 **[{Установить}][6]** Подсвечивает номера строк, упомянутых в комментарии к решению.
 
-![Submissions Mod Screenshot](.img/highlightlines.png)
+![Highlight Lines Screenshot](.img/highlightlines.png)
+
+Все описания также доступны в самих скриптах в поле *@description* и будут отображаться при установке.
+
+### Direct Link To Messages List
+**[{Установить}][7]** Делает текст «n непрочитанных сообщений» ссылкой на страницу с сообщениями.
+
+![Direct Link To Messages Screenshot](.img/goto.png)
 
 Все описания также доступны в самих скриптах в поле *@description* и будут отображаться при установке.
 
@@ -78,3 +85,4 @@
 [4]: https://github.com/Facenapalm/Highlight.js/raw/master/hide_unnecessary_tasks.user.js
 [5]: https://github.com/YaLTeR/Highlight.js/raw/master/SubmissionsMod.user.js
 [6]: https://github.com/YaLTeR/Highlight.js/raw/master/HighlightLines.user.js
+[7]: https://github.com/Facenapalm/Highlight.js/raw/master/goto_messages_list.user.js
