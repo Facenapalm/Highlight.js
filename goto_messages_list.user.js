@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        Direct Link To Messages List
-// @version     0.2
+// @version     0.3
 // @namespace   EjudgeFE
 // @description Скрипт делает текст «n непрочитанных сообщений» ссылкой на страницу с сообщениями и устанавливает правильное склонение.
 // @include     https://unicorn.ejudge.ru/ej/client/*
@@ -17,7 +17,8 @@
 
     var locale;
 
-    if (document.getElementsByClassName('contest_actions_item')[0].innerHTML.indexOf('Настройки') > -1) {
+    var elemForLocaleIdentification = document.getElementsByClassName('contest_actions_item').item(0);
+    if (elemForLocaleIdentification && elemForLocaleIdentification.innerHTML.indexOf('Настройки') > -1) {
         locale = locales.ru;
     } else {
         locale = locales.en;
@@ -43,7 +44,7 @@
     var clarsHref;
     for (var i in a) {
         var linkText = a[i].innerHTML;
-        if (linkText.indexOf('Сообщения') > -1 || linkText.indexOf('Clars') > -1) {
+        if (linkText && linkText.indexOf('Сообщения') > -1 || linkText.indexOf('Clars') > -1) {
             clarsHref = a[i].href;
             break;
         }
