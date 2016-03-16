@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        Hide Unnecessary Problems
-// @version     1.7.1
+// @version     1.9
 // @namespace   EjudgeFE
 // @description Скрипт оставляет в списке задач в Ejudge видимыми только нерешенные задачи.
 // @include     https://unicorn.ejudge.ru/ej/client/*
@@ -29,8 +29,10 @@ var locales = {
 };
 var locale;
 var regexp = { mz : /mz\d\d-\d*/, up : /up\d\d-\d*/, kr : /kr\d\d-\d*/, ku : /ku\d\d-\d*/ };
-//testingInProgressMessage += ' СПОРИМ, НЕ ЗАЙДЕТ?';
-//testingCompleted += ' ЗАШЛА? ^_^';
+if (testingInProgressMessage !== undefined && testingCompleted !== undefined) {
+    testingInProgressMessage += ' СПОРИМ, НЕ ЗАЙДЕТ?';
+    testingCompleted += ' ЗАШЛА? ^_^';
+}
 
 (function(){
     "use strict";
@@ -85,7 +87,7 @@ var regexp = { mz : /mz\d\d-\d*/, up : /up\d\d-\d*/, kr : /kr\d\d-\d*/, ku : /ku
                     }
                 } else {
                     var elem = classes[type][i];
-                    if (elem.classList[0] == 'probOk' || elem.classList[0] == 'probTrans') {
+                    if (elem.classList[0] == 'probOk' || elem.classList[0] == 'probTrans' || isUnavailable(elem)) {
                         modify.push(elem);
                     }
                 }
@@ -186,8 +188,10 @@ function isUnavailable(node) {
     xhr.open('GET', node.firstChild.href);
     var loadingIndicator = node.appendChild(document.createTextNode('...'));
     xhr.onreadystatechange = function() {
-        if (xhr.status == 200 && xhr.responseText.indexOf('action_139', 4000) > 0) {
+        if (xhr.readyState == 4) {
             node.removeChild(loadingIndicator);
+        }
+        if (xhr.status == 200 && xhr.responseText.indexOf('action_139', 4000) > 0) {
             modify.push(node);
             hide();
         }
