@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        Hide Unnecessary Problems
-// @version     1.8
+// @version     1.9
 // @namespace   EjudgeFE
 // @description Скрипт оставляет в списке задач в Ejudge видимыми только нерешенные задачи.
 // @include     https://unicorn.ejudge.ru/ej/client/*
@@ -188,8 +188,10 @@ function isUnavailable(node) {
     xhr.open('GET', node.firstChild.href);
     var loadingIndicator = node.appendChild(document.createTextNode('...'));
     xhr.onreadystatechange = function() {
-        if (xhr.status == 200 && xhr.responseText.indexOf('action_139', 4000) > 0) {
+        if (xhr.readyState == 4) {
             node.removeChild(loadingIndicator);
+        }
+        if (xhr.status == 200 && xhr.responseText.indexOf('action_139', 4000) > 0) {
             modify.push(node);
             hide();
         }
