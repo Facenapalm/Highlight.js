@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        Collect User Standings
-// @version     0.1a
+// @version     0.2a
 // @namespace   EjudgeFE
 // @description Собирает статистику по группам в сводную таблицу.
 // @include     https://unicorn.ejudge.ru/ej/client/standings/*
@@ -41,21 +41,25 @@
     }
 
     var senderInfo = document.title;
-    var data = 'sender=' + encodeURI(/[А-Яа-я]+\s+[А-Яа-я]+/.exec(senderInfo)[0]) +
+    var nameRE = /[А-Яа-я]+/g;
+    var senderSurname = nameRE.exec(senderInfo)[0], senderName = nameRE.exec(senderInfo)[0];
+    var data = 'sender_first_name=' + encodeURI(senderName) +
+        '&sender_last_name=' + encodeURI(senderSurname) +
         '&group=' + /\d+/.exec(senderInfo)[0] +
         '&full_sender_info=' + encodeURI(senderInfo) +
         '&length=' + names.length;
 
     for (i in names) {
-        data += '&name' + i + '=' + encodeURI(names[i]) +
+        nameRE.lastIndex = 0;
+        data += '&surname' + i + '=' + encodeURI(nameRE.exec(names[i])[0]) +
+            '&name' + i + '=' + encodeURI(nameRE.exec(names[i])[0]) +
             '&total' + i + '=' + total[i] +
             '&score' + i + '=' + score[i];
     }
 
     GM_xmlhttpRequest({
         method: 'POST',
-        //url: 'http://ejstat.cloudapp.net',
-        url: 'http://ubuntu14classic.cloudapp.net:7000',
+        url: 'http://localhost:8000/ejstat/load',
         data: data,
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
