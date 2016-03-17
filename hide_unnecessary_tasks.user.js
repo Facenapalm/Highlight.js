@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        Hide Unnecessary Problems
-// @version     1.9
+// @version     1.10
 // @namespace   EjudgeFE
 // @description Скрипт оставляет в списке задач в Ejudge видимыми только нерешенные задачи.
 // @include     https://unicorn.ejudge.ru/ej/client/*
@@ -49,12 +49,16 @@ if (testingInProgressMessage !== undefined && testingCompleted !== undefined) {
 
     var pool = document.querySelectorAll('.probOk, .probTrans, .probBad, .probEmpty');
     var n = pool.length;
+    var type, j;
     for (var i = 0; i < n; i++) {
         var name = pool[i].firstChild.innerHTML;
         var tmp = undefined;
-        for (var type in regexp) {
+        for (type in regexp) {
+            if (!regexp.hasOwnProperty(type)) {
+                break;
+            }
             if (regexp[type].test(name)) {
-                var j = parseInt(name.substr(2, 4));
+                j = parseInt(name.substr(2, 4));
                 var k = parseInt(name.substr(5));
                 tmp = type;
                 break;
@@ -70,13 +74,23 @@ if (testingInProgressMessage !== undefined && testingCompleted !== undefined) {
         }
     }
 
-    for (var type in classes) {
+    var elem;
+    for (type in classes) {
+        if (!classes.hasOwnProperty(type)) {
+            break;
+        }
         var pairedType = getPairedType(type);
         if (type != 'mz' && type != 'kr') {
             for (i in classes[type]) {
+                if (!classes[type].hasOwnProperty(i)) {
+                    break;
+                }
                 if (type != 'other') {
-                    for (var j in classes[type][i]) {
-                        var elem = classes[type][i][j];
+                    for (j in classes[type][i]) {
+                        if (!classes[type][i].hasOwnProperty(j)) {
+                            break;
+                        }
+                        elem = classes[type][i][j];
                         if ((elem.classList[0] == 'probOk' || elem.classList[0] == 'probTrans')) {
                             modify.push(elem);
                             if (classes[pairedType].hasOwnProperty(i) &&
@@ -86,7 +100,7 @@ if (testingInProgressMessage !== undefined && testingCompleted !== undefined) {
                         }
                     }
                 } else {
-                    var elem = classes[type][i];
+                    elem = classes[type][i];
                     if (elem.classList[0] == 'probOk' || elem.classList[0] == 'probTrans' || isUnavailable(elem)) {
                         modify.push(elem);
                     }
@@ -94,8 +108,14 @@ if (testingInProgressMessage !== undefined && testingCompleted !== undefined) {
             }
         } else {
             for (i in classes[type]) {
-                for (var j in classes[type][i]) {
-                    var elem = classes[type][i][j];
+                if (!classes[type].hasOwnProperty(i)) {
+                    break;
+                }
+                for (j in classes[type][i]) {
+                    if (!classes[type][i].hasOwnProperty(j)) {
+                        break;
+                    }
+                    elem = classes[type][i][j];
                     var nextContestExists = classes[type].hasOwnProperty( (parseInt(i) + 1).toString() );
                     if ((elem.classList[0] == 'probOk' || elem.classList[0] == 'probTrans') &&
                         classes[pairedType].hasOwnProperty(i) &&
