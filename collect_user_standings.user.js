@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        Collect User Standings
-// @version     0.2a
+// @version     0.3a
 // @namespace   EjudgeFE
 // @description Собирает статистику по группам в сводную таблицу.
 // @include     https://unicorn.ejudge.ru/ej/client/standings/*
@@ -46,7 +46,6 @@
     var data = 'sender_first_name=' + encodeURI(senderName) +
         '&sender_last_name=' + encodeURI(senderSurname) +
         '&group=' + /\d+/.exec(senderInfo)[0] +
-        '&full_sender_info=' + encodeURI(senderInfo) +
         '&length=' + names.length;
 
     for (i in names) {
