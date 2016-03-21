@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        Collect User Standings
-// @version     0.3a
+// @version     0.4a
 // @namespace   EjudgeFE
 // @description Собирает статистику по группам в сводную таблицу.
 // @include     https://unicorn.ejudge.ru/ej/client/standings/*
@@ -16,7 +16,8 @@
     var scoreNodes = document.getElementsByClassName('st_score'); // 1 + n + 0 + 1 + n + 3 == 2n + 5 || 1 + n + 0 == n + 1
 
     var names = [];
-    for (var i in nameNodes) {
+    var n = nameNodes.length;
+    for (var i = 0; i < n; i++) {
         var name;
         if (name = /[А-Яа-я]+\s+[А-Яа-я]+/.exec(nameNodes[i].innerHTML)) {
             names.push(name[0]);
@@ -25,7 +26,7 @@
 
     var totalNodes = [].slice.call(document.getElementsByClassName('st_total'), 1, names.length + 1); // 1 + n + 3 == n + 4
     var total = [];
-    for (i in totalNodes) {
+    for (i = 0; i < n; i++) {
         var ttl;
         if (ttl = /\d+/.exec(totalNodes[i].innerHTML)) {
             total.push(ttl[0]);
@@ -33,7 +34,7 @@
     }
 
     var score = [];
-    for (i in scoreNodes) {
+    for (i = 0; i < n; i++) {
         var scr;
         if (scr = /^\d+$/.exec(scoreNodes[i].innerHTML)) {
             score.push(scr[0]);
@@ -48,7 +49,8 @@
         '&group=' + /\d+/.exec(senderInfo)[0] +
         '&length=' + names.length;
 
-    for (i in names) {
+    n = names.length;
+    for (i = 0; i < n; i++) {
         nameRE.lastIndex = 0;
         data += '&surname' + i + '=' + encodeURI(nameRE.exec(names[i])[0]) +
             '&name' + i + '=' + encodeURI(nameRE.exec(names[i])[0]) +
