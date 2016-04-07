@@ -79,6 +79,9 @@
 
 ![Direct Link To Messages Screenshot](.img/goto.png)
 
+### Fetch
+**[{Установить}][8]** Подбробности на сайте [ejstat.ru](http://ejstat.cloudapp.net) в разделе [ЧаВо](http://ejstat.cloudapp.net/faq) (ответы на частые вопросы).
+
 Все описания также доступны в самих скриптах в поле *@description* и будут отображаться при установке.
 
 [3]: https://github.com/Facenapalm/Highlight.js/raw/master/highlight.user.js
@@ -86,3 +89,4 @@
 [5]: https://github.com/YaLTeR/Highlight.js/raw/master/SubmissionsMod.user.js
 [6]: https://github.com/YaLTeR/Highlight.js/raw/master/HighlightLines.user.js
 [7]: https://github.com/Facenapalm/Highlight.js/raw/master/goto_messages_list.user.js
+[7]: https://github.com/Facenapalm/Highlight.js/raw/master/fetch.user.js
