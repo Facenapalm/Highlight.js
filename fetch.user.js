@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name        Collect User Standings
+// @name        Fetch
 // @version     1.0
 // @namespace   EjudgeFE
 // @description Собирает статистику по группам в сводную таблицу.
