@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        Collect User Standings
-// @version     0.4a
+// @version     1.0
 // @namespace   EjudgeFE
 // @description Собирает статистику по группам в сводную таблицу.
 // @include     https://unicorn.ejudge.ru/ej/client/standings/*
@@ -60,10 +60,13 @@
 
     GM_xmlhttpRequest({
         method: 'POST',
-        url: 'http://localhost:8000/ejstat/load',
+        url: 'http://ejstat.ru/load',
         data: data,
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        onload: function(res) {
+            console.log(res.responseText);
         }
     });
 })();
