@@ -89,4 +89,4 @@
 [5]: https://github.com/YaLTeR/Highlight.js/raw/master/SubmissionsMod.user.js
 [6]: https://github.com/YaLTeR/Highlight.js/raw/master/HighlightLines.user.js
 [7]: https://github.com/Facenapalm/Highlight.js/raw/master/goto_messages_list.user.js
-[7]: https://github.com/Facenapalm/Highlight.js/raw/master/fetch.user.js
+[8]: https://github.com/Facenapalm/Highlight.js/raw/master/fetch.user.js
