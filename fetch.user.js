@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        Collect User Standings
-// @version     1.0
+// @version     1.1
 // @namespace   EjudgeFE
 // @description Собирает статистику по группам в сводную таблицу.
 // @include     https://unicorn.ejudge.ru/ej/client/standings/*
@@ -23,8 +23,9 @@
             names.push(name[0]);
         }
     }
+    n = names.length;
 
-    var totalNodes = [].slice.call(document.getElementsByClassName('st_total'), 1, names.length + 1); // 1 + n + 3 == n + 4
+    var totalNodes = [].slice.call(document.getElementsByClassName('st_total'), 1, n + 1); // 1 + n + 3 == n + 4
     var total = [];
     for (i = 0; i < n; i++) {
         var ttl;
