@@ -35,6 +35,7 @@
     }
 
     var score = [];
+    n = scoreNodes.length;
     for (i = 0; i < n; i++) {
         var scr;
         if (scr = /^\d+$/.exec(scoreNodes[i].innerHTML)) {
@@ -42,15 +43,15 @@
         }
     }
 
+    n = names.length;
     var senderInfo = document.title;
     var nameRE = /[А-Яа-я]+/g;
     var senderSurname = nameRE.exec(senderInfo)[0], senderName = nameRE.exec(senderInfo)[0];
     var data = 'sender_first_name=' + encodeURI(senderName) +
         '&sender_last_name=' + encodeURI(senderSurname) +
         '&group=' + /\d+/.exec(senderInfo)[0] +
-        '&length=' + names.length;
+        '&length=' + n;
 
-    n = names.length;
     for (i = 0; i < n; i++) {
         nameRE.lastIndex = 0;
         data += '&surname' + i + '=' + encodeURI(nameRE.exec(names[i])[0]) +
